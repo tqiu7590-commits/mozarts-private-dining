@@ -86,6 +86,7 @@ function calendarDays(year: number, month: number) {
 
 export default function Home() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [transition, setTransition] = useState<"idle" | "cover" | "reveal">("idle");
   const [wipeTone, setWipeTone] = useState<"green" | "red" | "paper">("green");
   const [visibleMonth, setVisibleMonth] = useState(new Date(2026, 8, 1));
@@ -204,12 +205,65 @@ export default function Home() {
               <span>Reserve a table</span>
             </button>
             <p>Evening service · 20:15</p>
+            <button className="about-trigger" type="button" onClick={() => setCreditsOpen(true)}>
+              Learn more about us
+            </button>
           </div>
 
           <div className="red-mark" aria-hidden="true">
             <span>Bon</span>
             <span>Appétit</span>
           </div>
+
+          {creditsOpen && (
+            <div
+              className="credits-backdrop"
+              onClick={() => setCreditsOpen(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setCreditsOpen(false);
+              }}
+            >
+              <div
+                className="credits-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-label="About us"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  className="credits-close"
+                  type="button"
+                  autoFocus
+                  aria-label="Close"
+                  onClick={() => setCreditsOpen(false)}
+                >
+                  ×
+                </button>
+                <p>
+                  <span>Designed by <strong>AAA洛阳畚箕批发小王</strong></span>
+                  <a
+                    href="https://xhslink.cn/o/6UquAZFXWtR"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open AAA洛阳畚箕批发小王 on Xiaohongshu"
+                  >
+                    ↗
+                  </a>
+                </p>
+                <p>
+                  <span>Written by <strong>sangshuishangshu</strong></span>
+                  <a
+                    href="https://archiveofourown.org/users/sanshuishangshu/pseuds/sanshuishangshu"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open sangshuishangshu on AO3"
+                  >
+                    ↗
+                  </a>
+                </p>
+              </div>
+            </div>
+          )}
         </section>
       ) : screen === "reservation" ? (
         <section className="reservation-screen" aria-labelledby="reservation-title">

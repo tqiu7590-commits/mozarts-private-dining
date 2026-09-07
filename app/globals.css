@@ -210,6 +210,119 @@ h1 span {
   text-transform: uppercase;
 }
 
+.hero-action .about-trigger {
+  display: block;
+  width: fit-content;
+  min-height: auto;
+  margin: 14px auto 0;
+  padding: 1px 0 2px;
+  border: 0;
+  background: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-transform: none;
+  transition: color 220ms ease;
+}
+
+.hero-action .about-trigger:hover,
+.hero-action .about-trigger:focus-visible {
+  opacity: 0.62;
+  outline: none;
+}
+
+.credits-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 26px;
+  background: rgb(40 59 49 / 48%);
+  backdrop-filter: blur(4px);
+  animation: death-notice-fade 240ms ease both;
+}
+
+.credits-panel {
+  position: relative;
+  width: min(100%, 340px);
+  padding: 49px 23px 24px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgb(40 59 49 / 24%);
+  font-family: "Helvetica Neue", "Avenir Next", Arial, sans-serif;
+  animation: death-notice-arrives 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.credits-panel > p {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 13px;
+  margin: 0;
+  padding: 17px 0;
+  border-top: 1px solid rgb(89 99 79 / 36%);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.credits-panel > p:last-child {
+  border-bottom: 1px solid rgb(89 99 79 / 36%);
+}
+
+.credits-panel strong {
+  font-weight: 500;
+}
+
+.credits-panel a {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background-color 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.credits-panel a:hover,
+.credits-panel a:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+  outline: none;
+  transform: translate(1px, -1px);
+}
+
+.credits-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.credits-close:hover,
+.credits-close:focus-visible {
+  opacity: 0.58;
+  outline: none;
+}
+
 .red-mark {
   position: absolute;
   right: -41px;
