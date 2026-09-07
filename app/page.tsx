@@ -247,7 +247,7 @@ export default function Home() {
                     rel="noreferrer"
                     aria-label="Open AAA洛阳畚箕批发小王 on Xiaohongshu"
                   >
-                    ↗
+                    <span className="external-arrow" aria-hidden="true" />
                   </a>
                 </p>
                 <p>
@@ -258,7 +258,7 @@ export default function Home() {
                     rel="noreferrer"
                     aria-label="Open sangshuishangshu on AO3"
                   >
-                    ↗
+                    <span className="external-arrow" aria-hidden="true" />
                   </a>
                 </p>
               </div>

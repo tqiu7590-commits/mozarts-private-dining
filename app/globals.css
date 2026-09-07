@@ -302,6 +302,36 @@ h1 span {
   transform: translate(1px, -1px);
 }
 
+.external-arrow {
+  position: relative;
+  display: block;
+  width: 11px;
+  height: 11px;
+}
+
+.external-arrow::before {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: rotate(-45deg);
+  transform-origin: left center;
+}
+
+.external-arrow::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  content: "";
+}
+
 .credits-close {
   position: absolute;
   top: 14px;
