@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Screen = "home" | "reservation" | "identity" | "confirmation" | "menu" | "finale";
+type Screen = "home" | "reservation" | "hunger" | "identity" | "confirmation" | "menu" | "finale";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const appetites = ["Forgiveness", "Desire", "Recognition", "Nothing"] as const;
 const minimumDate = new Date(2026, 8, 12);
 const courses = [
   {
@@ -90,8 +91,11 @@ export default function Home() {
   const [visibleMonth, setVisibleMonth] = useState(new Date(2026, 8, 1));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dateState, setDateState] = useState<"choosing" | "checking" | "retained">("choosing");
+  const [deathNoticeOpen, setDeathNoticeOpen] = useState(false);
+  const [appetite, setAppetite] = useState("");
   const [guestName, setGuestName] = useState("");
   const [identityState, setIdentityState] = useState<"typing" | "checking" | "recognised">("typing");
+  const [nameNotice, setNameNotice] = useState<{ message: string; enterInvitation: boolean } | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
 
@@ -120,9 +124,32 @@ export default function Home() {
     timers.current.push(window.setTimeout(() => setDateState("retained"), 1050));
   }
 
+  function selectDate(date: Date) {
+    setSelectedDate(date);
+    if (date.getMonth() === 11 && date.getDate() === 5) {
+      setDeathNoticeOpen(true);
+    }
+  }
+
   function identifyGuest(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!guestName.trim() || identityState !== "typing") return;
+
+    const normalizedName = guestName.trim().replace(/\s+/g, " ").normalize("NFC").toLowerCase();
+    if (normalizedName === "yanis" || normalizedName === "yanis richard") {
+      setNameNotice({
+        message: "Indisponible pour vous-même, Monsieur Mozart.",
+        enterInvitation: false,
+      });
+      return;
+    }
+    if (normalizedName === "laurent" || normalizedName === "laurent bán") {
+      setNameNotice({
+        message: "Vous avez déjà un rendez-vous, maestro Salieri.",
+        enterInvitation: true,
+      });
+      return;
+    }
 
     setIdentityState("checking");
     timers.current.push(
@@ -134,6 +161,12 @@ export default function Home() {
         1150,
       ),
     );
+  }
+
+  function closeNameNotice() {
+    const enterInvitation = nameNotice?.enterInvitation;
+    setNameNotice(null);
+    if (enterInvitation) moveTo("confirmation");
   }
 
   const year = visibleMonth.getFullYear();
@@ -246,7 +279,7 @@ export default function Home() {
                         type="button"
                         disabled={disabled || dateState === "checking"}
                         className={selected ? "selected" : ""}
-                        onClick={() => setSelectedDate(date)}
+                        onClick={() => selectDate(date)}
                         aria-pressed={selected}
                       >
                         {day}
@@ -263,6 +296,84 @@ export default function Home() {
           </div>
 
           <p className="reservation-footnote">One sitting each evening · 20:15</p>
+
+          {deathNoticeOpen && (
+            <div
+              className="death-notice-backdrop"
+              onClick={() => setDeathNoticeOpen(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setDeathNoticeOpen(false);
+              }}
+            >
+              <div
+                className="death-notice"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="death-notice-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <p className="death-notice-mark" aria-hidden="true">†</p>
+                <p id="death-notice-title">
+                  Sorry, our chef, Monsieur W.A.Mozart, will die today.
+                </p>
+                <p className="death-notice-rip">R.I.P</p>
+                <button
+                  type="button"
+                  autoFocus
+                  aria-label="Close memorial notice"
+                  onClick={() => setDeathNoticeOpen(false)}
+                >
+                  <span aria-hidden="true">🕯️</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      ) : screen === "hunger" ? (
+        <section className="hunger-screen" aria-labelledby="hunger-title">
+          <header className="reservation-header">
+            <button type="button" onClick={() => moveTo("identity")} aria-label="Return to guest details">
+              Back
+            </button>
+            <span aria-hidden="true">M</span>
+            <p>Reservation · 03</p>
+          </header>
+
+          <div className="hunger-intro">
+            <p className="reservation-kicker">Your appetite</p>
+            <h2 id="hunger-title">What are you hungry for?</h2>
+          </div>
+
+          <fieldset className="appetite-options">
+            <legend>Choose one</legend>
+            {appetites.map((option, index) => (
+              <label key={option}>
+                <input
+                  type="radio"
+                  name="appetite"
+                  value={option}
+                  checked={appetite === option}
+                  onChange={() => setAppetite(option)}
+                />
+                <span className="appetite-number">0{index + 1}</span>
+                <span className="appetite-name">{option}</span>
+                <span className="appetite-mark" aria-hidden="true">●</span>
+              </label>
+            ))}
+          </fieldset>
+
+          <p className="hunger-note">
+            The chef prefers to know which appetite he is expected to satisfy.
+          </p>
+
+          <button
+            className="hunger-continue"
+            type="button"
+            disabled={!appetite}
+            onClick={() => moveTo("confirmation")}
+          >
+            Continue
+          </button>
         </section>
       ) : screen === "identity" ? (
         <section className="identity-screen" aria-labelledby="identity-title">
@@ -306,12 +417,37 @@ export default function Home() {
           <div className={`recognition-message ${identityState === "recognised" ? "visible" : ""}`} aria-live="polite">
             <p>Guest recognised.</p>
             <p>The chef has been expecting you.</p>
-            <button className="invitation-button" type="button" onClick={() => moveTo("confirmation")}>
-              Review invitation
+            <button className="invitation-button" type="button" onClick={() => moveTo("hunger")}>
+              Continue
             </button>
           </div>
 
           <p className="reservation-footnote">Domgasse 5 · One guest expected</p>
+
+          {nameNotice && (
+            <div
+              className="death-notice-backdrop"
+              onClick={closeNameNotice}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") closeNameNotice();
+              }}
+            >
+              <div
+                className="death-notice name-notice"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="name-notice-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <p id="name-notice-title" className="name-notice-message">
+                  {nameNotice.message}
+                </p>
+                <button type="button" autoFocus onClick={closeNameNotice}>
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       ) : screen === "confirmation" ? (
         <section className="confirmation-screen" aria-labelledby="confirmation-title">
