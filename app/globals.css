@@ -872,26 +872,104 @@ h1 span {
 }
 
 .identity-form.checking input {
-  color: transparent;
+  padding-right: 40px;
+  -webkit-text-fill-color: #e9e2d9;
+  opacity: 1;
   text-shadow: none;
 }
 
+.identity-form.crossing input,
 .identity-form.recognised input {
   border-color: var(--mint);
-  color: var(--mint);
-  text-shadow: 7px 0 20px rgb(105 201 166 / 22%);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  opacity: 1;
   transition: none;
+}
+
+.name-overwrite {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  padding: 6px 0 13px;
+  border-bottom: 1px solid var(--mint);
+  pointer-events: none;
+  font-family: "Helvetica Neue", "Avenir Next", Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+}
+
+.identity-form.crossing .name-input-shell input,
+.identity-form.recognised .name-input-shell input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+.crossed-name {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #e9e2d9;
+}
+
+.name-scribble {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.name-scribble path {
+  fill: none;
+  stroke: #9f1019;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: scribble-draw 430ms linear forwards;
+}
+
+@keyframes scribble-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.replacement-name {
+  display: block;
+  color: #e9e2d9;
+  white-space: nowrap;
+  font-family: "Helvetica Neue", "Avenir Next", Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  text-shadow: none;
+  animation: scribble-stroke 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes scribble-stroke {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0); }
 }
 
 .name-loader {
   position: absolute;
   top: 50%;
-  left: 50%;
+  right: 4px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
   background: conic-gradient(var(--red) 0 43%, var(--mint) 43% 86%, transparent 86% 100%);
-  transform: translate(-50%, -62%);
+  transform: translateY(-62%);
   animation: name-loader-spin 720ms linear infinite;
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
@@ -1618,7 +1696,7 @@ h1 span {
 }
 
 @keyframes name-loader-spin {
-  to { transform: translate(-50%, -62%) rotate(1turn); }
+  to { transform: translateY(-62%) rotate(1turn); }
 }
 
 @keyframes confirmation-arrives {

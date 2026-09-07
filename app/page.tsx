@@ -95,7 +95,8 @@ export default function Home() {
   const [deathNoticeOpen, setDeathNoticeOpen] = useState(false);
   const [appetite, setAppetite] = useState("");
   const [guestName, setGuestName] = useState("");
-  const [identityState, setIdentityState] = useState<"typing" | "checking" | "recognised">("typing");
+  const [identityState, setIdentityState] = useState<"typing" | "checking" | "crossing" | "recognised">("typing");
+  const [submittedName, setSubmittedName] = useState("");
   const [nameNotice, setNameNotice] = useState<{ message: string; enterInvitation: boolean } | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
@@ -152,14 +153,16 @@ export default function Home() {
       return;
     }
 
+    setSubmittedName(guestName);
     setIdentityState("checking");
     timers.current.push(
+      window.setTimeout(() => setIdentityState("crossing"), 2000),
       window.setTimeout(
         () => {
           setGuestName("Antonio Salieri");
           setIdentityState("recognised");
         },
-        1150,
+        2500,
       ),
     );
   }
@@ -458,12 +461,23 @@ export default function Home() {
                 spellCheck="false"
               />
               {identityState === "checking" && <span className="name-loader" aria-label="Consulting the guest book" />}
+              {(identityState === "crossing" || identityState === "recognised") && (
+                <div className="name-overwrite" aria-hidden="true">
+                  <span className="crossed-name">
+                    {submittedName}
+                    <svg className="name-scribble" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+                      <path pathLength="1" d="M3 23 C24 10 48 31 73 17 S128 10 159 23 L196 12 C176 16 160 33 133 26 S79 10 46 26 L8 31 Q27 17 60 20 T113 29 Q146 11 192 29 L173 33 Q144 19 121 22 T66 31 Q35 11 5 17 L28 9 Q59 30 93 13 T153 17 L197 22 Q167 7 146 12 T103 18 Q62 8 19 25 L4 11 Q41 18 64 13 T118 27 Q160 30 197 17 L178 9 Q143 34 103 24 T43 18 L7 28 Q50 35 84 23 T145 14 L195 31 Q153 23 124 31 T66 19 L9 14" />
+                    </svg>
+                  </span>
+                  {identityState === "recognised" && <span className="replacement-name">Antonio Salieri</span>}
+                </div>
+              )}
             </div>
             <p className="name-note">The chef prefers to know whom he is serving.</p>
 
             <button className="identify-button" type="submit" disabled={!guestName.trim() || identityState !== "typing"}>
               {identityState === "typing" && "Continue"}
-              {identityState === "checking" && "Consulting the guest book…"}
+              {(identityState === "checking" || identityState === "crossing") && "Consulting the guest book…"}
               {identityState === "recognised" && "Guest recognised"}
             </button>
           </form>
