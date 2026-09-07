@@ -9,7 +9,7 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December",
 ];
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-const appetites = ["Forgiveness", "Desire", "Recognition", "Nothing"] as const;
+const appetites = ["Forgiveness", "Desire", "Recognition", "Love", "Nothing"] as const;
 const minimumDate = new Date(2026, 8, 12);
 const courses = [
   {
