@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Screen = "home" | "reservation" | "hunger" | "identity" | "confirmation" | "menu" | "finale";
+type Screen = "home" | "reservation" | "hunger" | "identity" | "confirmation" | "funeral" | "menu" | "finale";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -11,6 +11,22 @@ const monthNames = [
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const appetites = ["Forgiveness", "Desire", "Recognition", "Love", "Nothing"] as const;
 const minimumDate = new Date(2026, 8, 12);
+const funeralSignatureLinesFrench = [
+  "Sincèrement vôtre —",
+  "celui qui implore votre Pardon,",
+  "qui veut combler votre Désir,",
+  "qui souhaite obtenir votre Reconnaissance",
+  "et qui veut vous aimer,",
+  "W. A. Mozart",
+] as const;
+const funeralSignatureLinesEnglish = [
+  "Sincerely yours —",
+  "the one who begs for your Forgiveness,",
+  "who wants to satisfy your Desire,",
+  "who longs for your Recognition,",
+  "and who wants to love you,",
+  "W. A. Mozart",
+] as const;
 const courses = [
   {
     id: "aperitif",
@@ -93,6 +109,13 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dateState, setDateState] = useState<"choosing" | "checking" | "retained">("choosing");
   const [deathNoticeOpen, setDeathNoticeOpen] = useState(false);
+  const [funeralPhase, setFuneralPhase] = useState<"confirmation" | "flicker" | "letter">("confirmation");
+  const [funeralLetterLanguage, setFuneralLetterLanguage] = useState<"fr" | "en">("fr");
+  const [signatureStarted, setSignatureStarted] = useState(false);
+  const [signatureTyping, setSignatureTyping] = useState(true);
+  const [letterSwitching, setLetterSwitching] = useState(false);
+  const [funeralLetterReady, setFuneralLetterReady] = useState(false);
+  const [funeralContinuationOpen, setFuneralContinuationOpen] = useState(false);
   const [appetite, setAppetite] = useState("");
   const [guestName, setGuestName] = useState("");
   const [identityState, setIdentityState] = useState<"typing" | "checking" | "crossing" | "recognised">("typing");
@@ -100,12 +123,56 @@ export default function Home() {
   const [nameNotice, setNameNotice] = useState<{ message: string; enterInvitation: boolean } | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
+  const funeralSignatureRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
+  useEffect(() => {
+    if (screen !== "funeral") return;
+
+    setFuneralPhase("confirmation");
+    setFuneralLetterLanguage("fr");
+    setSignatureStarted(false);
+    setSignatureTyping(true);
+    setLetterSwitching(false);
+    setFuneralLetterReady(false);
+    setFuneralContinuationOpen(false);
+    const flickerTimer = window.setTimeout(() => setFuneralPhase("flicker"), 2000);
+    const letterTimer = window.setTimeout(() => setFuneralPhase("letter"), 3150);
+
+    return () => {
+      window.clearTimeout(flickerTimer);
+      window.clearTimeout(letterTimer);
+    };
+  }, [screen]);
+
+  useEffect(() => {
+    if (funeralPhase !== "letter") return;
+    if (!signatureTyping) return;
+    const signature = funeralSignatureRef.current;
+    if (!signature) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setSignatureStarted(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setSignatureStarted(true);
+        observer.disconnect();
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(signature);
+    return () => observer.disconnect();
+  }, [funeralPhase, funeralLetterLanguage, signatureTyping]);
+
   function moveTo(nextScreen: Screen) {
     if (transition !== "idle") return;
-    setWipeTone(nextScreen === "confirmation" || nextScreen === "finale" ? "red" : nextScreen === "menu" ? "paper" : "green");
+    setWipeTone(nextScreen === "confirmation" || nextScreen === "funeral" || nextScreen === "finale" ? "red" : nextScreen === "menu" ? "paper" : "green");
     setTransition("cover");
     timers.current.push(
       window.setTimeout(() => {
@@ -131,6 +198,29 @@ export default function Home() {
     if (date.getMonth() === 11 && date.getDate() === 5) {
       setDeathNoticeOpen(true);
     }
+  }
+
+  function reserveFuneral() {
+    setDeathNoticeOpen(false);
+    moveTo("funeral");
+  }
+
+  function toggleFuneralTranslation() {
+    if (letterSwitching) return;
+    setLetterSwitching(true);
+
+    const swapTimer = window.setTimeout(() => {
+      setFuneralLetterLanguage((current) => current === "fr" ? "en" : "fr");
+      setSignatureTyping(false);
+      setSignatureStarted(true);
+
+      const revealTimer = window.setTimeout(() => {
+        setLetterSwitching(false);
+        setFuneralLetterReady(true);
+      }, 40);
+      timers.current.push(revealTimer);
+    }, 260);
+    timers.current.push(swapTimer);
   }
 
   function identifyGuest(event: React.FormEvent<HTMLFormElement>) {
@@ -177,9 +267,13 @@ export default function Home() {
   const month = visibleMonth.getMonth();
   const days = calendarDays(year, month);
   const atFirstMonth = year === 2026 && month === 8;
+  const funeralSignatureLines = funeralLetterLanguage === "fr" ? funeralSignatureLinesFrench : funeralSignatureLinesEnglish;
+  const funeralSignatureWordCount = funeralSignatureLines.reduce((total, line) => total + line.split(" ").length, 0);
+  let funeralSignatureWordIndex = 0;
+  let funeralSignatureDelay = 0;
 
   return (
-    <main className={`mobile-page ${screen === "confirmation" || screen === "finale" ? "red" : screen !== "home" ? "green" : ""}`}>
+    <main className={`mobile-page ${screen === "confirmation" || screen === "funeral" || screen === "finale" ? "red" : screen !== "home" ? "green" : ""}`}>
       {screen === "home" ? (
         <section className="hero" aria-labelledby="restaurant-name">
           <header className="hero-header">
@@ -374,13 +468,8 @@ export default function Home() {
                   Sorry, our chef, Monsieur W.A.Mozart, will die today.
                 </p>
                 <p className="death-notice-rip">R.I.P</p>
-                <button
-                  type="button"
-                  autoFocus
-                  aria-label="Close memorial notice"
-                  onClick={() => setDeathNoticeOpen(false)}
-                >
-                  <span aria-hidden="true">🕯️</span>
+                <button className="funeral-reserve-button" type="button" autoFocus onClick={reserveFuneral}>
+                  Reserve a place at his funeral
                 </button>
               </div>
             </div>
@@ -516,6 +605,162 @@ export default function Home() {
               </div>
             </div>
           )}
+        </section>
+      ) : screen === "funeral" ? funeralPhase === "letter" ? (
+        <article className="funeral-letter" aria-labelledby="funeral-letter-title">
+          <div className={`funeral-letter-inner ${letterSwitching ? "is-switching" : ""}`}>
+          <header className="funeral-letter-header">
+            <span>Domgasse 5 · {funeralLetterLanguage === "fr" ? "Vienne" : "Vienna"}</span>
+            <span>{funeralLetterLanguage === "fr" ? "5 décembre 1791" : "5 December 1791"}</span>
+          </header>
+
+          <div className="funeral-letter-copy">
+            {funeralLetterLanguage === "fr" ? (
+              <>
+                <h2 id="funeral-letter-title">Je le savais !</h2>
+                <p>Vous voyiez déjà comment mon histoire finirait, n’est-ce pas ?</p>
+                <p>
+                  Je pouvais vous donner tout ce que vous vouliez. Je pouvais combler votre Désir,
+                  vous accorder mon Pardon, vous offrir mon Amour, mon cœur. J’espérais qu’ils vous
+                  parviendraient. Gardez-les bien pour moi — ces choses si précieuses dont je n’ai
+                  peut-être jamais su faire bon usage.
+                </p>
+                <p>Il vous suffisait de réserver une place à mes funérailles.</p>
+                <p>Alors venez, Maestro. Ne me faites pas attendre.</p>
+              </>
+            ) : (
+              <>
+                <h2 id="funeral-letter-title">I knew it!</h2>
+                <p>You could already see how my story would end, couldn’t you?</p>
+                <p>
+                  I could give you everything you wanted. I could satisfy your Desire, grant you my
+                  Forgiveness, offer you my Love, my heart. I hoped they would find their way to you.
+                  Keep them safe for me — those precious things I may never have known how to use wisely.
+                </p>
+                <p>All you had to do was reserve a place at my funeral.</p>
+                <p>So come, Maestro. Do not keep me waiting.</p>
+              </>
+            )}
+          </div>
+
+          <p
+            ref={funeralSignatureRef}
+            className={`funeral-letter-signature ${signatureTyping ? (signatureStarted ? "typing" : "") : "static"}`}
+            aria-label={funeralLetterLanguage === "fr"
+              ? "Sincèrement vôtre — celui qui implore votre Pardon, qui veut combler votre Désir, qui souhaite obtenir votre Reconnaissance et qui veut vous aimer, W. A. Mozart"
+              : "Sincerely yours — the one who begs for your Forgiveness, who wants to satisfy your Desire, who longs for your Recognition, and who wants to love you, W. A. Mozart"}
+          >
+            {funeralSignatureLines.map((line) => (
+              <span className="funeral-signature-line" key={line} aria-hidden="true">
+                {line.split(" ").map((word, wordInLine, words) => {
+                  const delay = funeralSignatureDelay;
+                  const wordIndex = funeralSignatureWordIndex;
+                  const isNameLine = line === "W. A. Mozart";
+                  const rhythm = [80, 145, 95, 210, 115, 70, 170];
+                  const punctuationPause = /[,—]$/.test(word) ? 230 : /[.!?]$/.test(word) ? 310 : 0;
+                  const linePause = wordInLine === words.length - 1 ? 260 : 0;
+                  const cadence = isNameLine ? 340 : rhythm[funeralSignatureWordIndex % rhythm.length];
+                  const duration = 125 + (funeralSignatureWordIndex % 4) * 35;
+                  funeralSignatureDelay += cadence + punctuationPause + linePause;
+                  funeralSignatureWordIndex += 1;
+                  return (
+                    <span
+                      className="funeral-signature-word"
+                      style={{ animationDelay: `${delay}ms`, animationDuration: `${duration}ms` }}
+                      key={`${line}-${word}-${delay}`}
+                      onAnimationEnd={wordIndex === funeralSignatureWordCount - 1 ? () => setFuneralLetterReady(true) : undefined}
+                    >
+                      {word}{" "}
+                    </span>
+                  );
+                })}
+              </span>
+            ))}
+          </p>
+          <button className="funeral-translation-link" type="button" disabled={letterSwitching} onClick={toggleFuneralTranslation}>
+            {funeralLetterLanguage === "fr" ? "maybe you need a translation" : "return to the original"}
+          </button>
+          {funeralLetterReady && (
+            <button className="funeral-next-button" type="button" onClick={() => setFuneralContinuationOpen(true)}>
+              NEXT
+            </button>
+          )}
+          </div>
+          {funeralContinuationOpen && (
+            <div
+              className="funeral-continuation-backdrop"
+              onClick={() => setFuneralContinuationOpen(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setFuneralContinuationOpen(false);
+              }}
+            >
+              <div
+                className="funeral-continuation-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="funeral-continuation-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <p id="funeral-continuation-title">Would you like to continue with your dinner reservation?</p>
+                <div className="funeral-continuation-actions">
+                  <button type="button" autoFocus onClick={() => {
+                    setFuneralContinuationOpen(false);
+                    moveTo("reservation");
+                  }}>
+                    Yes, continue
+                  </button>
+                  <button type="button" onClick={() => setFuneralContinuationOpen(false)}>
+                    Observe a moment of silence
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </article>
+      ) : (
+        <section className={`confirmation-screen funeral-confirmation ${funeralPhase === "flicker" ? "is-flickering" : ""}`} aria-labelledby="funeral-title">
+          <header className="confirmation-header">
+            <button type="button" onClick={() => moveTo("reservation")} aria-label="Return to date selection">
+              Back
+            </button>
+            <span aria-hidden="true">M</span>
+            <p>Funeral</p>
+          </header>
+
+          <div className="confirmation-copy">
+            <p className="confirmation-kicker">Reservation accepted</p>
+            <div className="confirmation-title-wrap">
+              <h2 id="funeral-title">Your place has been reserved.</h2>
+            </div>
+            <p>The deceased has been expecting you.</p>
+          </div>
+
+          <dl className="reservation-summary">
+            <div>
+              <dt>Guest</dt>
+              <dd>Antonio Salieri</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>5 December 1791</dd>
+            </div>
+            <div>
+              <dt>Service</dt>
+              <dd>Funeral of W. A. Mozart</dd>
+            </div>
+            <div>
+              <dt>Attendance</dt>
+              <dd>1 mourner</dd>
+            </div>
+          </dl>
+
+          <div className="confirmation-address">
+            <p>Vienna</p>
+            <p>Austria</p>
+          </div>
+
+          <p className="arrival-note">Please arrive before the final note.</p>
+          <div className="appetit-echo funeral-echo" aria-hidden="true">Requiem</div>
         </section>
       ) : screen === "confirmation" ? (
         <section className="confirmation-screen" aria-labelledby="confirmation-title">
