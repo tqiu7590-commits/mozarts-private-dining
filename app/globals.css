@@ -522,6 +522,14 @@ h1 span {
   border-top: 1px solid rgb(233 226 217 / 55%);
 }
 
+.calendar-loading {
+  margin: 116px 0 0;
+  color: rgb(233 226 217 / 56%);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
 .calendar-heading {
   display: grid;
   grid-template-columns: 32px 1fr 32px;

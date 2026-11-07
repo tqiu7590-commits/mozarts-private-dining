@@ -10,7 +10,6 @@ const monthNames = [
 ];
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const appetites = ["Forgiveness", "Desire", "Recognition", "Love", "Nothing"] as const;
-const minimumDate = new Date(2026, 8, 12);
 const funeralSignatureLinesFrench = [
   "Sincèrement vôtre —",
   "celui qui implore votre Pardon,",
@@ -105,10 +104,12 @@ export default function Home() {
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [transition, setTransition] = useState<"idle" | "cover" | "reveal">("idle");
   const [wipeTone, setWipeTone] = useState<"green" | "red" | "paper">("green");
-  const [visibleMonth, setVisibleMonth] = useState(new Date(2026, 8, 1));
+  const [calendarToday, setCalendarToday] = useState<Date | null>(null);
+  const [visibleMonth, setVisibleMonth] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dateState, setDateState] = useState<"choosing" | "checking" | "retained">("choosing");
   const [deathNoticeOpen, setDeathNoticeOpen] = useState(false);
+  const [funeralCompleted, setFuneralCompleted] = useState(false);
   const [funeralPhase, setFuneralPhase] = useState<"confirmation" | "flicker" | "letter">("confirmation");
   const [funeralLetterLanguage, setFuneralLetterLanguage] = useState<"fr" | "en">("fr");
   const [signatureStarted, setSignatureStarted] = useState(false);
@@ -126,6 +127,20 @@ export default function Home() {
   const funeralSignatureRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
+
+  useEffect(() => {
+    if (screen !== "reservation") return;
+
+    const accessedAt = new Date();
+    const today = new Date(accessedAt.getFullYear(), accessedAt.getMonth(), accessedAt.getDate());
+    setCalendarToday(today);
+    setVisibleMonth((current) => current ?? new Date(today.getFullYear(), today.getMonth(), 1));
+
+    if (selectedDate && selectedDate < today) {
+      setSelectedDate(null);
+      setDateState("choosing");
+    }
+  }, [screen, selectedDate]);
 
   useEffect(() => {
     if (screen !== "funeral") return;
@@ -184,7 +199,15 @@ export default function Home() {
   }
 
   function changeMonth(direction: -1 | 1) {
-    setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1));
+    setVisibleMonth((current) => {
+      if (!current) return current;
+      const nextMonth = new Date(current.getFullYear(), current.getMonth() + direction, 1);
+      if (direction === -1 && calendarToday) {
+        const firstAvailableMonth = new Date(calendarToday.getFullYear(), calendarToday.getMonth(), 1);
+        if (nextMonth < firstAvailableMonth) return current;
+      }
+      return nextMonth;
+    });
   }
 
   function saveDate() {
@@ -203,6 +226,14 @@ export default function Home() {
   function reserveFuneral() {
     setDeathNoticeOpen(false);
     moveTo("funeral");
+  }
+
+  function continueAfterFuneral() {
+    setFuneralContinuationOpen(false);
+    setFuneralCompleted(true);
+    setSelectedDate(null);
+    setDateState("choosing");
+    moveTo("reservation");
   }
 
   function toggleFuneralTranslation() {
@@ -263,10 +294,14 @@ export default function Home() {
     if (enterInvitation) moveTo("confirmation");
   }
 
-  const year = visibleMonth.getFullYear();
-  const month = visibleMonth.getMonth();
-  const days = calendarDays(year, month);
-  const atFirstMonth = year === 2026 && month === 8;
+  const year = visibleMonth?.getFullYear() ?? 0;
+  const month = visibleMonth?.getMonth() ?? 0;
+  const days = visibleMonth ? calendarDays(year, month) : [];
+  const atFirstMonth = Boolean(
+    calendarToday
+    && year === calendarToday.getFullYear()
+    && month === calendarToday.getMonth(),
+  );
   const funeralSignatureLines = funeralLetterLanguage === "fr" ? funeralSignatureLinesFrench : funeralSignatureLinesEnglish;
   const funeralSignatureWordCount = funeralSignatureLines.reduce((total, line) => total + line.split(" ").length, 0);
   let funeralSignatureWordIndex = 0;
@@ -402,6 +437,8 @@ export default function Home() {
                   Continue
                 </button>
               </div>
+            ) : !calendarToday || !visibleMonth ? (
+              <p className="calendar-loading" aria-live="polite">Preparing today&apos;s calendar…</p>
             ) : (
               <>
                 <div className="calendar-heading">
@@ -422,7 +459,8 @@ export default function Home() {
                   {days.map((day, index) => {
                     if (day === null) return <span key={`empty-${index}`} />;
                     const date = new Date(year, month, day);
-                    const disabled = date < minimumDate;
+                    const funeralDateLocked = funeralCompleted && month === 11 && day === 5;
+                    const disabled = date < calendarToday || funeralDateLocked;
                     const selected = selectedDate?.getTime() === date.getTime();
                     return (
                       <button
@@ -432,6 +470,7 @@ export default function Home() {
                         className={selected ? "selected" : ""}
                         onClick={() => selectDate(date)}
                         aria-pressed={selected}
+                        aria-label={funeralDateLocked ? `${day}, unavailable` : String(day)}
                       >
                         {day}
                       </button>
@@ -703,10 +742,7 @@ export default function Home() {
               >
                 <p id="funeral-continuation-title">Would you like to continue with your dinner reservation?</p>
                 <div className="funeral-continuation-actions">
-                  <button type="button" autoFocus onClick={() => {
-                    setFuneralContinuationOpen(false);
-                    moveTo("reservation");
-                  }}>
+                  <button type="button" autoFocus onClick={continueAfterFuneral}>
                     Yes, continue
                   </button>
                   <button type="button" onClick={() => setFuneralContinuationOpen(false)}>
