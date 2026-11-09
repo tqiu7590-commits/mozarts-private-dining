@@ -1299,8 +1299,8 @@ h1 span {
   text-align: right;
 }
 
-.menu-intro {
-  padding: clamp(48px, 8svh, 72px) 0 35px;
+.course-intro {
+  padding: clamp(40px, 7svh, 64px) 0 0;
 }
 
 .menu-kicker {
@@ -1313,142 +1313,99 @@ h1 span {
   text-transform: uppercase;
 }
 
-.menu-intro h2 {
+.course-intro h2 {
   margin: 0;
-  font-family: "Helvetica Neue", "Avenir Next", Arial, sans-serif;
-  font-size: clamp(54px, 15vw, 66px);
-  font-weight: 300;
-  letter-spacing: -0.065em;
-  line-height: 0.9;
-}
-
-.menu-intro > p:last-child {
-  margin: 22px 0 0;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.course-list {
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid rgb(89 99 79 / 58%);
-  list-style: none;
-}
-
-.course-list li {
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  align-items: baseline;
-  padding: 13px 0 12px;
-  border-bottom: 1px solid rgb(89 99 79 / 28%);
-}
-
-.course-list li.available-course {
-  display: block;
-  padding: 0;
-}
-
-.available-course button {
-  display: grid;
-  width: 100%;
-  grid-template-columns: 42px 1fr auto;
-  align-items: baseline;
-  padding: 13px 0 12px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-.available-course button:hover p,
-.available-course button:focus-visible p {
-  color: var(--red);
-}
-
-.course-list span {
-  color: var(--red);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.course-list p {
-  margin: 0;
-  font-size: 22px;
+  font-size: clamp(42px, 12vw, 52px);
   font-style: italic;
-  letter-spacing: -0.03em;
-  transition: color 300ms ease;
-}
-
-.course-list .course-arrow {
-  color: var(--ink);
-  font-size: 14px;
   font-weight: 400;
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: -0.035em;
+  line-height: 0.95;
 }
 
-.available-course button[aria-expanded="true"] .course-arrow {
-  transform: rotate(180deg);
+.course-rule {
+  display: block;
+  width: 36px;
+  margin: 24px 0;
+  border-top: 1px solid rgb(89 99 79 / 58%);
 }
 
-.course-accordion {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 650ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 350ms ease;
+.course-rule.centered {
+  margin: 34px auto;
 }
 
-.course-accordion.open {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.course-accordion-inner {
-  min-height: 0;
-  overflow: hidden;
-  padding-left: 42px;
-}
-
-.course-accordion.open .course-accordion-inner {
-  padding-bottom: 24px;
-}
-
-.course-accordion p {
-  font-style: normal;
-  letter-spacing: normal;
-}
-
-.course-accordion .accordion-label {
-  margin: 5px 0 10px;
-  color: var(--red);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.course-accordion .accordion-ingredients {
+.course-ingredients {
   margin: 0;
   font-size: 11px;
   font-style: italic;
   line-height: 1.6;
 }
 
-.course-accordion .accordion-description {
-  margin: 18px 0 0;
+.course-ingredients-zh {
+  margin: 6px 0 0;
+  color: #4f5748;
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.course-description {
+  margin: 20px 0 0;
   max-width: 295px;
   color: #4f5748;
   font-size: 12px;
   font-style: italic;
   line-height: 1.62;
+}
+
+.course-story {
+  color: var(--ink);
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  font-size: 15px;
+  line-height: 1.95;
+  text-align: justify;
+}
+
+.course-story p {
+  margin: 0 0 0.6em;
+  text-indent: 2em;
+}
+
+.course-story .course-story-pending {
+  color: rgb(89 99 79 / 62%);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  text-indent: 0;
+}
+
+.course-progress {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-progress li {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+
+.course-progress li.served {
+  background: var(--ink);
+}
+
+.course-progress li.current {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.course-screen .menu-next {
+  margin-top: 28px;
 }
 
 .menu-footnote {
