@@ -670,13 +670,14 @@ export default function Home() {
             ) : (
               <>
                 <h2 id="funeral-letter-title">I knew it!</h2>
-                <p>You could already see how my story would end, couldn’t you?</p>
+                <p>You already saw how my story would end, didn’t you?</p>
                 <p>
-                  I could give you everything you wanted. I could satisfy your Desire, grant you my
-                  Forgiveness, offer you my Love, my heart. I hoped they would find their way to you.
-                  Keep them safe for me — those precious things I may never have known how to use wisely.
+                  Everything you wanted was mine to give. It was in my power to satisfy your Desire,
+                  grant you my Forgiveness, offer you my Love, my heart. All the while, I was hoping
+                  they would find their way to you. Keep them safe for me — these precious things I may
+                  never have known how to put to good use.
                 </p>
-                <p>All you had to do was reserve a place at my funeral.</p>
+                <p>All you ever had to do was reserve a place at my funeral.</p>
                 <p>So come, Maestro. Do not keep me waiting.</p>
               </>
             )}
